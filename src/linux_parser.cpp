@@ -7,19 +7,26 @@
 
 
 // DONE: An example of how to read data from the filesystem
-std::string LinuxParser::OperatingSystem() {
+std::string LinuxParser::OperatingSystem()
+{
   std::string line;
   std::string key;
   std::string value;
   std::ifstream filestream(kOSPath);
-  if (filestream.is_open()) {
-    while (std::getline(filestream, line)) {
+
+  if (filestream.is_open())
+  {
+    while (std::getline(filestream, line))
+    {
       std::replace(line.begin(), line.end(), ' ', '_');
       std::replace(line.begin(), line.end(), '=', ' ');
       std::replace(line.begin(), line.end(), '"', ' ');
       std::istringstream linestream(line);
-      while (linestream >> key >> value) {
-        if (key == "PRETTY_NAME") {
+
+      while (linestream >> key >> value)
+      {
+        if (key == "PRETTY_NAME")
+        {
           std::replace(value.begin(), value.end(), '_', ' ');
           return value;
         }
@@ -30,11 +37,14 @@ std::string LinuxParser::OperatingSystem() {
 }
 
 // DONE: An example of how to read data from the filesystem
-std::string LinuxParser::Kernel() {
+std::string LinuxParser::Kernel()
+{
   std::string os, kernel, version;
   std::string line;
   std::ifstream stream(kProcDirectory + kVersionFilename);
-  if (stream.is_open()) {
+
+  if (stream.is_open())
+  {
     std::getline(stream, line);
     std::istringstream linestream(line);
     linestream >> os >> version >> kernel;
