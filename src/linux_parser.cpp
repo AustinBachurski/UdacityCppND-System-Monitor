@@ -68,13 +68,12 @@ std::vector<int> LinuxParser::Pids() {
 std::vector<int> LinuxParser::Pids()
 {
   std::vector<int> pids;
-  const std::filesystem::path directory = std::filesystem::path(kProcDirectory);
-  
-  for (const auto& file : std::filesystem::directory_iterator(directory))
+
+  for (const auto& file : std::filesystem::directory_iterator(kProcDirectory))
   {
     if (file.is_directory())
     {
-      std::string filename(file.filename);
+      std::string filename(file.filename());
       if (std::all_of(filename.begin(), filename.end(), isdigit))
       {
         pids.push_back(stoi(filename));
