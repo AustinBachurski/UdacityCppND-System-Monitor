@@ -6,24 +6,38 @@
 #include "process.h"
 
 
-// TODO: Return this process's ID
-int Process::Pid() { return 0; }
+int Process::Pid()
+{
+    // TODO: Return this process's ID
+}
 
-// TODO: Return this process's CPU utilization
-float Process::CpuUtilization() { return 0; }
+float Process::CpuUtilization()
+{
+    // TODO: Return this process's CPU utilization
+}
 
-// TODO: Return the command that generated this process
-std::string Process::Command() { return std::string(); }
+std::string Process::Command()
+{
+    // TODO: Return the command that generated this process
+}
 
-// TODO: Return this process's memory utilization
-std::string Process::Ram() { return std::string(); }
+std::string Process::Ram()
+{
+    // TODO: Return this process's memory utilization
+}
 
-// TODO: Return the user (name) that generated this process
-std::string Process::User() { return std::string(); }
+std::string Process::User()
+{
+    // TODO: Return the user (name) that generated this process
+}
 
-// TODO: Return the age of this process (in seconds)
-long int Process::UpTime() { return 0; }
+long int Process::UpTime()
+{
+    // TODO: Return the age of this process (in seconds)
+}
 
-// TODO: Overload the "less than" comparison operator for Process objects
-// REMOVE: [[maybe_unused]] once you define the function
-bool Process::operator<(Process const& a[[maybe_unused]]) const { return true; }
+bool Process::operator<(Process const& a[[maybe_unused]]) const
+{
+    // TODO: Overload the "less than" comparison operator for Process objects
+    // REMOVE: [[maybe_unused]] once you define the function
+}

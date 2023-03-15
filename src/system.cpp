@@ -6,31 +6,56 @@
 #include "process.h"
 #include "processor.h"
 #include "system.h"
+#include "linux_parser.h"
+/*
+Kernel and Operating System information won't change while the tool is
+open - retrieve the information once and store in member variables.
+*/
+System():
+m_cpu{},
+m_processes{},
+m_kernel{LinuxParser::Kernel()},
+m_operatingSystem{LinuxParser::OperatingSystem()}
+{}
 
-/*You need to complete the mentioned TODOs in order to satisfy the rubric criteria "The student will be able to extract and display basic data about the system."
+Processor& System::Cpu()
+{
+    return m_cpu;
+}
 
-You need to properly format the uptime. Refer to the comments mentioned in format. cpp for formatting the uptime.*/
+std::vector<Process>& System::Processes()
+{ 
+    // TODO: Still need to update the process vector before returning.
+    return m_processes;
+}
 
-// TODO: Return the system's CPU
-Processor& System::Cpu() { return cpu_; }
+std::string System::Kernel()
+{ 
+    return m_kernel;
+}
 
-// TODO: Return a container composed of the system's processes
-std::vector<Process>& System::Processes() { return processes_; }
+float System::MemoryUtilization()
+{
+    // TODO: Return the system's memory utilization
+}
 
-// TODO: Return the system's kernel identifier (string)
-std::string System::Kernel() { return std::string(); }
+std::string System::OperatingSystem()
+{
+    return m_operatingSystem;
+}
 
-// TODO: Return the system's memory utilization
-float System::MemoryUtilization() { return 0.0; }
+int System::RunningProcesses()
+{
+    // TODO: Return the number of processes actively running on the system
+}
 
-// TODO: Return the operating system name
-std::string System::OperatingSystem() { return std::string(); }
+int System::TotalProcesses()
+{
+    // TODO: Return the total number of processes on the system
+}
 
-// TODO: Return the number of processes actively running on the system
-int System::RunningProcesses() { return 0; }
-
-// TODO: Return the total number of processes on the system
-int System::TotalProcesses() { return 0; }
-
-// TODO: Return the number of seconds since the system started running
-long int System::UpTime() { return 0; }
+long int System::UpTime()
+{
+    // TODO: Return the number of seconds since the system started running
+    // You need to properly format the uptime. Refer to the comments mentioned in format. cpp for formatting the uptime.
+}
