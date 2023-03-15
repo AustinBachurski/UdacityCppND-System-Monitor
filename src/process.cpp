@@ -5,35 +5,50 @@
 #include <vector>
 #include "process.h"
 
+Process(
+    int pid, 
+    float utilization, 
+    std::string command, 
+    std::string memory, 
+    std::string user, 
+    long int age
+):
+m_pid{pid},
+m_cpuUtilization{utilization},
+m_generatedCommand{command},
+m_memoryUtilization{memory},
+m_user{user},
+m_age{age}
+{}
 
 int Process::Pid()
 {
-    // TODO: Return this process's ID
+    return m_pid;
 }
 
 float Process::CpuUtilization()
 {
-    // TODO: Return this process's CPU utilization
+    return m_cpuUtilization;
 }
 
 std::string Process::Command()
 {
-    // TODO: Return the command that generated this process
+    return m_generatedCommand;
 }
 
 std::string Process::Ram()
 {
-    // TODO: Return this process's memory utilization
+    return m_memoryUtilization;
 }
 
 std::string Process::User()
 {
-    // TODO: Return the user (name) that generated this process
+    return m_user;
 }
 
 long int Process::UpTime()
 {
-    // TODO: Return the age of this process (in seconds)
+    return m_age;
 }
 
 bool Process::operator<(Process const& a[[maybe_unused]]) const
