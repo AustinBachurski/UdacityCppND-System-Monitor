@@ -43,6 +43,7 @@ std::string LinuxParser::Kernel() {
 }
 
 // BONUS: Update this to use std::filesystem
+/*
 std::vector<int> LinuxParser::Pids() {
   std::vector<int> pids;
   DIR* directory = opendir(kProcDirectory.c_str());
@@ -59,6 +60,27 @@ std::vector<int> LinuxParser::Pids() {
     }
   }
   closedir(directory);
+  return pids;
+}
+*/
+
+//Bonus Attempt:
+std::vector<int> LinuxParser::Pids()
+{
+  std::vector<int> pids;
+  const std::filesystem::path directory = std::filesystem::path(kProcDirectory);
+  
+  for (const auto& file : std::filesystem::directory_iterator(directory))
+  {
+    if (file.is_directory())
+    {
+      std::string filename(file.filename);
+      if (std::all_of(filename.begin(), filename.end(), isdigit))
+      {
+        pids.push_back(stoi(filename));
+      }
+    }
+  }
   return pids;
 }
 
