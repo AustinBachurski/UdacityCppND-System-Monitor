@@ -8,7 +8,7 @@
 
 namespace LinuxParser
 {
-    // Paths
+    // Delete this before submitting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     const std::string kProcDirectory{"/proc/"};
     const std::string kCmdlineFilename{"/cmdline"};
     const std::string kCpuinfoFilename{"/cpuinfo"};
@@ -20,16 +20,12 @@ namespace LinuxParser
     const std::string kOSPath{"/etc/os-release"};
     const std::string kPasswordPath{"/etc/passwd"};
 
-    // System
-    float MemoryUtilization();
-    long UpTime();
-    std::vector<int> Pids();
-    int TotalProcesses();
-    int RunningProcesses();
-    std::string OperatingSystem();
-    std::string Kernel();
 
-    // CPU
+
+    std::vector<int> m_pids;
+    const std::string m_runningProcesses {"procs_running"};
+    const std::string m_totalProcesses {"processes"};
+
     enum CPUStates 
     {
         kUser_ = 0,
@@ -43,19 +39,26 @@ namespace LinuxParser
         kGuest_,
         kGuestNice_
     };
-    
-    std::vector<std::string> CpuUtilization();
-    long Jiffies();
+
     long ActiveJiffies();
     long ActiveJiffies(int pid);
-    long IdleJiffies();
-
-    // Processes
     std::string Command(int pid);
+    int CoreCount();
+    int GetProcesses(const std::string state);
+    long IdleJiffies();
+    bool IsNumber(const std::string& value);
+    long Jiffies();
+    std::string Kernel();
+    float MemoryUtilization();
+    std::string OperatingSystem();
+    std::vector<int>* Pids();
     std::string Ram(int pid);
+    int RunningProcesses();
+    int TotalProcesses();
     std::string Uid(int pid);
-    std::string User(int pid);
+    long UpTime();
     long int UpTime(int pid);
+    std::string User(int pid);
 };
 
 #endif

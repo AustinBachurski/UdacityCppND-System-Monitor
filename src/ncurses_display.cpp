@@ -39,6 +39,21 @@ void NCursesDisplay::DisplaySystem(System& system, WINDOW* window)
     mvwprintw(window, row, 10, "");
     wprintw(window, ProgressBar(system.Cpu().Utilization()).c_str());
     wattroff(window, COLOR_PAIR(1));
+    // Multicore?
+    if (system.Cpu().Multicore())
+    {
+        int coreNumber = 0;
+        for (const float& coreUtilization : *system.Cpu().Cores())
+        {
+            mvwprintw(window, ++row, 2, "Core" + std::to_string(coreNumber) + ": ");
+            wattron(window, COLOR_PAIR(1)); // Change colors if it works.
+            mvwprintw(window, row, 10, "");
+            wprintw(window, ProgressBar(coreUtilization).c_str());
+            wattroff(window, COLOR_PAIR(1)); // Change colors if it works.
+            ++coreNumber;
+        }
+    }
+    // Multicore?
     mvwprintw(window, ++row, 2, "Memory: ");
     wattron(window, COLOR_PAIR(1));
     mvwprintw(window, row, 10, "");

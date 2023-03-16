@@ -14,9 +14,12 @@ open - retrieve the information once and store in member variables.
 System::System():
 m_cpu{},
 m_processes{},
-m_kernel{LinuxParser::Kernel()},
-m_operatingSystem{LinuxParser::OperatingSystem()}
-{}
+m_kernel{},
+m_operatingSystem{}
+{
+    m_kernel = LinuxParser::Kernel();
+    m_operatingSystem = LinuxParser::OperatingSystem();
+}
 
 Processor& System::Cpu()
 {
@@ -25,6 +28,15 @@ Processor& System::Cpu()
 
 std::vector<Process>& System::Processes()
 { 
+    for (const int& pid : *LinuxParser::Pids())
+    {
+        
+
+
+
+        m_processes.push_back(Process());  // Think about emplace, understand it.
+    }
+    
     // TODO: Still need to update the process vector before returning.
     return m_processes;
 }
