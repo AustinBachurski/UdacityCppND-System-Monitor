@@ -8,7 +8,7 @@ It contains relevant attributes as shown below
 */
 class Process
 {
- public:
+  public:
     Process(
         int pid, 
         float utilization, 
@@ -16,8 +16,8 @@ class Process
         std::string memory, 
         std::string user, 
         long int age
-        );
-
+    );
+    
     int Pid();
     std::string User();
     std::string Command();
