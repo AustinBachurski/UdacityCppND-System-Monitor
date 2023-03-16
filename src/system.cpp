@@ -11,7 +11,7 @@
 Kernel and Operating System information won't change while the tool is
 open - retrieve the information once and store in member variables.
 */
-System():
+System::System():
 m_cpu{},
 m_processes{},
 m_kernel{LinuxParser::Kernel()},
@@ -37,6 +37,7 @@ std::string System::Kernel()
 float System::MemoryUtilization()
 {
     // TODO: Return the system's memory utilization
+    return 0.0f;
 }
 
 std::string System::OperatingSystem()
@@ -47,15 +48,18 @@ std::string System::OperatingSystem()
 int System::RunningProcesses()
 {
     // TODO: Return the number of processes actively running on the system
+    return 0;
 }
 
 int System::TotalProcesses()
 {
     // TODO: Return the total number of processes on the system
+    return 0;
 }
 
 long int System::UpTime()
 {
     // TODO: Return the number of seconds since the system started running
     // You need to properly format the uptime. Refer to the comments mentioned in format. cpp for formatting the uptime.
+    return 0;
 }

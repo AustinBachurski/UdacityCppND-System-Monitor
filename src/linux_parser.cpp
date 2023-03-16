@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <filesystem>
 #include <unistd.h>
 #include <sstream>
 #include <string>
@@ -83,7 +84,7 @@ std::vector<int> LinuxParser::Pids()
   {
     if (file.is_directory())
     {
-      std::string filename(file.filename());
+      std::string filename(file.path().filename());
       if (std::all_of(filename.begin(), filename.end(), isdigit))
       {
         pids.push_back(stoi(filename));

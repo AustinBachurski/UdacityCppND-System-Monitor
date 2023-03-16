@@ -5,7 +5,7 @@
 #include <vector>
 #include "process.h"
 
-Process(
+Process::Process(
     int pid, 
     float utilization, 
     std::string command, 
@@ -55,4 +55,5 @@ bool Process::operator<(Process const& a[[maybe_unused]]) const
 {
     // TODO: Overload the "less than" comparison operator for Process objects
     // REMOVE: [[maybe_unused]] once you define the function
+    return true;
 }
