@@ -35,7 +35,7 @@ void Processor::CoreUtilization()
             filestreamNow >> check;
             if (check == expectedCore)
             {
-                filestreamNow >> m_cpuUserNow >> m_cpuNiceNow >> m_cpuSystemNow;
+                filestreamThen >> m_cpuUserThen >> m_cpuNiceThen >> m_cpuSystemThen >> m_cpuIdleThen;
             }
         }
         usleep(500000);
@@ -46,7 +46,7 @@ void Processor::CoreUtilization()
             filestreamNow >> check;
             if (check == expectedCore)
             {
-                filestreamThen >> m_cpuUserThen >> m_cpuNiceThen >> m_cpuSystemThen;
+                filestreamNow >> m_cpuUserNow >> m_cpuNiceNow >> m_cpuSystemNow >> m_cpuIdleNow;
             }
         }
 
@@ -94,16 +94,18 @@ int Processor::SetCoreCount()
 
 float Processor::Utilization()
 {
+    std::string id {};
+
     std::ifstream filestreamThen(m_statPath);
     if (filestreamThen.is_open())
     {
-        filestreamThen >> m_cpuUserThen >> m_cpuNiceThen >> m_cpuSystemThen;
+        filestreamThen >> id >> m_cpuUserThen >> m_cpuNiceThen >> m_cpuSystemThen >> m_cpuIdleThen;
     }
     usleep(500000);
     std::ifstream filestreamNow(m_statPath);
     if (filestreamNow.is_open())
     {
-        filestreamNow >> m_cpuUserNow >> m_cpuNiceNow >> m_cpuSystemNow;
+        filestreamNow >> id >> m_cpuUserNow >> m_cpuNiceNow >> m_cpuSystemNow >> m_cpuIdleNow;
     }
 
     m_sumThen = m_cpuUserThen + m_cpuNiceThen + m_cpuSystemThen + m_cpuIdleThen;
@@ -113,6 +115,6 @@ float Processor::Utilization()
     {
         return (m_sumNow - m_sumThen) - (m_cpuIdleNow - m_cpuIdleThen) / (m_sumNow - m_sumThen);
     }
-    return 0.75f;
+    return 0.0f;
 }
 
