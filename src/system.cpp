@@ -28,13 +28,17 @@ Processor& System::Cpu()
 
 std::vector<Process>& System::Processes()
 { 
-    for (const int& pid : *LinuxParser::Pids())
+    for (const int& pid : LinuxParser::Pids())
     {
-        
+        float utilization;
+        std::string command;
+        std::string memory;
+        std::string user;
+        long int age;
 
 
 
-        m_processes.push_back(Process());  // Think about emplace, understand it.
+        m_processes.push_back(Process(pid, utilization, command, memory, user, age));  // Think about emplace, understand it.
     }
     
     // TODO: Still need to update the process vector before returning.

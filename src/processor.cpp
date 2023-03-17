@@ -1,5 +1,6 @@
 #include "processor.h"
 
+
 Processor::Processor() :
 m_coreCount{ SetCoreCount() },
 m_cores{}, // Pre-allocate size from core count?
@@ -25,19 +26,28 @@ void Processor::CoreUtilization()
     int currentCore {0};
     while (currentCore < m_coreCount)
     {
-        std::string previousCores {"cpu" + std::to_string(currentCore)};
+        std::string check {};
+        std::string expectedCore {"cpu" + std::to_string(currentCore)};
         std::ifstream filestreamNow(m_statPath);
         if (filestreamNow.is_open())
         {
-            filestreamNow.ignore(std::numeric_limits<std::streamsize>::max(), previousCores);
-            filestreamNow >> m_cpuUserNow >> m_cpuNiceNow >> m_cpuSystemNow;
+            filestreamNow.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            filestreamNow >> check;
+            if (check == expectedCore)
+            {
+                filestreamNow >> m_cpuUserNow >> m_cpuNiceNow >> m_cpuSystemNow;
+            }
         }
-        Sleep(500);
+        usleep(500000);
         std::ifstream filestreamThen(m_statPath);
         if (filestreamThen.is_open())
         {
-            filestreamThen.ignore(std::numeric_limits<std::streamsize>::max(), previousCores);
-            filestreamThen>> m_cpuUserThen >> m_cpuNiceThen >> m_cpuSystemThen;
+            filestreamThen.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            filestreamNow >> check;
+            if (check == expectedCore)
+            {
+                filestreamThen >> m_cpuUserThen >> m_cpuNiceThen >> m_cpuSystemThen;
+            }
         }
 
         m_sumThen = m_cpuUserThen + m_cpuNiceThen + m_cpuSystemThen + m_cpuIdleThen;
@@ -58,21 +68,28 @@ bool Processor::Multicore()
 
 int Processor::SetCoreCount()
 {
-    int count {0};
+    std::string check {};
+    int coreCount {0};
 
     std::ifstream filestream(m_statPath);
     if (filestream.is_open())
     {
         while (!filestream.eof())
         {
-            filestream.ignore(std::numeric_limits<std::streamsize>::max(), "cpu" + count);
-            if (!filestream.eof())
+            std::string expectedCore {"cpu" + std::to_string(coreCount)};
+            filestream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            filestream >> check;
+            if (check == expectedCore)
             {
-                ++count;
+                ++coreCount;
+            }
+            else
+            {
+                break;
             }
         }
     }
-    return count;
+    return coreCount;
 }
 
 float Processor::Utilization()
@@ -82,7 +99,7 @@ float Processor::Utilization()
     {
         filestreamThen >> m_cpuUserThen >> m_cpuNiceThen >> m_cpuSystemThen;
     }
-    Sleep(500);
+    usleep(500000);
     std::ifstream filestreamNow(m_statPath);
     if (filestreamNow.is_open())
     {
@@ -96,6 +113,6 @@ float Processor::Utilization()
     {
         return (m_sumNow - m_sumThen) - (m_cpuIdleNow - m_cpuIdleThen) / (m_sumNow - m_sumThen);
     }
-    return 0.0f;
+    return 0.75f;
 }
 

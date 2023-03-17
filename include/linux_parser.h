@@ -1,6 +1,7 @@
 #ifndef SYSTEM_PARSER_H
 #define SYSTEM_PARSER_H
 
+#include <ctype.h>
 #include <filesystem>
 #include <fstream>
 #include <regex>
@@ -22,7 +23,6 @@ namespace LinuxParser
 
 
 
-    std::vector<int> m_pids;
     const std::string m_runningProcesses {"procs_running"};
     const std::string m_totalProcesses {"processes"};
 
@@ -51,7 +51,7 @@ namespace LinuxParser
     std::string Kernel();
     float MemoryUtilization();
     std::string OperatingSystem();
-    std::vector<int>* Pids();
+    std::vector<int> Pids();
     std::string Ram(int pid);
     int RunningProcesses();
     int TotalProcesses();

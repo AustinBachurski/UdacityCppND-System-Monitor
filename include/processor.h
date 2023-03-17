@@ -2,6 +2,7 @@
 #define PROCESSOR_H
 
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <unistd.h>
 #include <vector>
@@ -10,6 +11,7 @@ class Processor
 {
   public:
     Processor();
+    std::vector<float>* Cores();
     void CoreUtilization();
     bool Multicore();
     int SetCoreCount();

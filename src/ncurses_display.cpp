@@ -45,7 +45,8 @@ void NCursesDisplay::DisplaySystem(System& system, WINDOW* window)
         int coreNumber = 0;
         for (const float& coreUtilization : *system.Cpu().Cores())
         {
-            mvwprintw(window, ++row, 2, "Core" + std::to_string(coreNumber) + ": ");
+            std::string core {"Core" + std::to_string(coreNumber) + ": "};
+            mvwprintw(window, ++row, 2, core.c_str());
             wattron(window, COLOR_PAIR(1)); // Change colors if it works.
             mvwprintw(window, row, 10, "");
             wprintw(window, ProgressBar(coreUtilization).c_str());
