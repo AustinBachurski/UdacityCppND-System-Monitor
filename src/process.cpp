@@ -51,5 +51,5 @@ long int Process::UpTime()
 
 bool Process::operator<(const Process& comparison) const
 {
-    return m_utilization < comparison.m_cpuUtilization;
+    return m_cpuUtilization < comparison.m_cpuUtilization;
 }
