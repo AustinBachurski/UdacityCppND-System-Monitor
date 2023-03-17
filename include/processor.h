@@ -12,12 +12,12 @@ class Processor
   public:
     Processor();
     std::vector<float>* Cores();
-    void CoreUtilization();
     bool Multicore();
     int SetCoreCount();
     float Utilization();
 
   private:
+    void UpdateCoreUtilization();
     const int m_coreCount;
     std::vector<float> m_cores;
     float m_cpuUserThen;

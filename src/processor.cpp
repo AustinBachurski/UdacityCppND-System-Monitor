@@ -18,31 +18,33 @@ m_sumNow{}
 
 std::vector<float>* Processor::Cores()
 {
+    UpdateCoreUtilization();
     return &m_cores;
 }
 
-void Processor::CoreUtilization()
+void Processor::UpdateCoreUtilization()
 {
     int currentCore {0};
     while (currentCore < m_coreCount)
     {
         std::string check {};
         std::string expectedCore {"cpu" + std::to_string(currentCore)};
-        std::ifstream filestreamNow(m_statPath);
-        if (filestreamNow.is_open())
-        {
-            filestreamNow.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            filestreamNow >> check;
-            if (check == expectedCore)
-            {
-                filestreamThen >> m_cpuUserThen >> m_cpuNiceThen >> m_cpuSystemThen >> m_cpuIdleThen;
-            }
-        }
-        usleep(500000);
         std::ifstream filestreamThen(m_statPath);
         if (filestreamThen.is_open())
         {
             filestreamThen.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            filestreamThen >> check;
+            if (check == expectedCore)
+            {
+                filestreamThen >> m_cpuUserThen >> m_cpuNiceThen >> m_cpuSystemThen >> m_cpuIdleThen;
+            }
+            filestreamThen.close();
+        }
+        usleep(500000);
+        std::ifstream filestreamNow(m_statPath);
+        if (filestreamNow.is_open())
+        {
+            filestreamNow.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             filestreamNow >> check;
             if (check == expectedCore)
             {
@@ -100,6 +102,7 @@ float Processor::Utilization()
     if (filestreamThen.is_open())
     {
         filestreamThen >> id >> m_cpuUserThen >> m_cpuNiceThen >> m_cpuSystemThen >> m_cpuIdleThen;
+        filestreamThen.close();
     }
     usleep(500000);
     std::ifstream filestreamNow(m_statPath);

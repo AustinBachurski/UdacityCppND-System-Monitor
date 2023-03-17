@@ -1,8 +1,6 @@
 #include <unistd.h>
-#include <cctype>
-#include <sstream>
 #include <string>
-#include <vector>
+
 #include "process.h"
 
 Process::Process(
@@ -13,12 +11,12 @@ Process::Process(
     std::string user, 
     long int age
 ):
-m_pid{pid},
-m_cpuUtilization{utilization},
-m_generatedCommand{command},
-m_memoryUtilization{memory},
-m_user{user},
-m_age{age}
+m_pid{ pid },
+m_cpuUtilization{ utilization },
+m_generatedCommand{ command },
+m_memoryUtilization{ memory },
+m_user{ user },
+m_age{ age }
 {}
 
 int Process::Pid()
@@ -51,9 +49,7 @@ long int Process::UpTime()
     return m_age;
 }
 
-bool Process::operator<(Process const& a[[maybe_unused]]) const
+bool Process::operator<(const Process& comparison) const
 {
-    // TODO: Overload the "less than" comparison operator for Process objects
-    // REMOVE: [[maybe_unused]] once you define the function
-    return true;
+    return m_utilization < comparison.m_cpuUtilization;
 }

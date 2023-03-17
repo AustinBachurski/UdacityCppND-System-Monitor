@@ -7,10 +7,7 @@
 #include "processor.h"
 #include "system.h"
 #include "linux_parser.h"
-/*
-Kernel and Operating System information won't change while the tool is
-open - retrieve the information once and store in member variables.
-*/
+
 System::System():
 m_cpu{},
 m_processes{},
@@ -19,6 +16,10 @@ m_operatingSystem{}
 {
     m_kernel = LinuxParser::Kernel();
     m_operatingSystem = LinuxParser::OperatingSystem();
+    /*
+    Kernel and Operating System information won't change while the
+    tool is open - retrieve the information once and store it.
+    */
 }
 
 Processor& System::Cpu()
@@ -28,21 +29,19 @@ Processor& System::Cpu()
 
 std::vector<Process>& System::Processes()
 { 
-    for (const int& pid : LinuxParser::Pids())
+    for (const int pid : LinuxParser::Pids())
     {
-        float utilization;
-        std::string command;
-        std::string memory;
-        std::string user;
-        long int age;
-
-
-
-        m_processes.push_back(Process(pid, utilization, command, memory, user, age));  // Think about emplace, understand it.
+        m_processes.emplace_back(Process(
+            pid,
+            LinuxParser::CpuUtilization(pid),
+            LinuxParser::Command(pid),
+            LinuxParser::Ram(pid),
+            LinuxParser::User(pid),
+            LinuxParser::UpTime(pid)
+            ));
     }
-    
-    // TODO: Still need to update the process vector before returning.
-    return m_processes;
+    std::sort(m_processes.begin(), m_processes.end(), Process::operator<())
+    return &m_processes;
 }
 
 std::string System::Kernel()
@@ -52,8 +51,7 @@ std::string System::Kernel()
 
 float System::MemoryUtilization()
 {
-    // TODO: Return the system's memory utilization
-    return 0.0f;
+    return LinuxParser::MemoryUtilization();
 }
 
 std::string System::OperatingSystem()
@@ -63,19 +61,15 @@ std::string System::OperatingSystem()
 
 int System::RunningProcesses()
 {
-    // TODO: Return the number of processes actively running on the system
-    return 0;
+    return LinuxParser::RunningProcesses();
 }
 
 int System::TotalProcesses()
 {
-    // TODO: Return the total number of processes on the system
-    return 0;
+    return LinuxParser::TotalProcesses();
 }
 
 long int System::UpTime()
 {
-    // TODO: Return the number of seconds since the system started running
-    // You need to properly format the uptime. Refer to the comments mentioned in format. cpp for formatting the uptime.
-    return 0;
+    return LinuxParser::UpTime();
 }

@@ -26,7 +26,7 @@ namespace LinuxParser
     const std::string m_runningProcesses {"procs_running"};
     const std::string m_totalProcesses {"processes"};
 
-    enum CPUStates 
+    enum CPUStates // Pointless, remove!
     {
         kUser_ = 0,
         kNice_,
@@ -40,10 +40,8 @@ namespace LinuxParser
         kGuestNice_
     };
 
-    long ActiveJiffies();
-    long ActiveJiffies(int pid);
     std::string Command(int pid);
-    int CoreCount();
+    float CpuUtilization(int pid);
     int GetProcesses(const std::string state);
     long IdleJiffies();
     bool IsNumber(const std::string& value);
