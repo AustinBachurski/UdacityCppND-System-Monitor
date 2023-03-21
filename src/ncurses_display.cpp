@@ -7,10 +7,8 @@
 #include "ncurses_display.h"
 #include "system.h"
 
-// 50 bars uniformly displayed from 0 - 100 %
-// 2% is one bar(|)
 std::string NCursesDisplay::ProgressBar(float percent)
-{
+{ // 50 '|' bars uniformly displayed from 0 - 100%
     std::string result{"0%"};
     int size{50};
     float bars{percent * size};
@@ -39,7 +37,6 @@ void NCursesDisplay::DisplaySystem(System& system, WINDOW* window)
     mvwprintw(window, row, 10, " ");
     wprintw(window, ProgressBar(system.Cpu().Utilization()).c_str());
     wattroff(window, COLOR_PAIR(1));
-    // Start Multicore
     if (system.Cpu().Multicore())
     {
         int coreNumber = 0;
@@ -55,7 +52,6 @@ void NCursesDisplay::DisplaySystem(System& system, WINDOW* window)
             ++coreNumber;
         }
     }
-    // End Multicore
     mvwprintw(window, ++row, 2, "Memory:");
     wattron(window, COLOR_PAIR(2));
     mvwprintw(window, row, 10, " ");

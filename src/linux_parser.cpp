@@ -118,33 +118,25 @@ float LinuxParser::MemoryUtilization()
     return 0.0f;
 }
 
-std::string LinuxParser::OperatingSystem()  // REFACTOR THIS
+std::string LinuxParser::OperatingSystem()
 {
-    std::string line {};
-    std::string key {};
-    std::string value {};
-
+    std::string os {};
+    
     std::ifstream filestream(m_os);
     if (filestream.is_open())
     {
-        while (std::getline(filestream, line))
+        while (!filestream.eof())
         {
-            std::replace(line.begin(), line.end(), ' ', '_');
-            std::replace(line.begin(), line.end(), '=', ' ');
-            std::replace(line.begin(), line.end(), '"', ' ');
-            std::istringstream linestream(line);
-
-            while (linestream >> key >> value)
+            filestream >> os;
+            if (os.find("PRETTY") != std::string::npos)
             {
-                if (key == "PRETTY_NAME")
-                {
-                    std::replace(value.begin(), value.end(), '_', ' ');
-                    return value;
-                }
+                os.erase(0, os.find("\""));
+                os.erase(test.rfind("\""));
+                return os;
             }
         }
     }
-    return value;
+    return "";
 }
 
 std::vector<int> LinuxParser::Pids()
@@ -207,6 +199,10 @@ int LinuxParser::RunningProcesses()
 std::string LinuxParser::SetFloatPrecisionAsString(float value, int decimalPlaces)
 {
     std::string valueAsString = std::to_string(value);
+    if (valueAsString.find('.') == 3)
+    {
+        return "100";
+    }
     valueAsString.erase(valueAsString.find('.') + decimalPlaces);
     return valueAsString;
 }
