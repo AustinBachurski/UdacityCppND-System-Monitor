@@ -10,9 +10,9 @@
 
 System::System():
 m_cpu{},
-m_processes{},
 m_kernel{},
-m_operatingSystem{}
+m_operatingSystem{},
+m_processes{}
 {
     m_kernel = LinuxParser::Kernel();
     m_operatingSystem = LinuxParser::OperatingSystem();
@@ -25,23 +25,6 @@ m_operatingSystem{}
 Processor& System::Cpu()
 {
     return m_cpu;
-}
-
-std::vector<Process>& System::Processes()
-{ 
-    for (const int pid : LinuxParser::Pids())
-    {
-        m_processes.emplace_back(Process(
-            pid,
-            LinuxParser::CpuUtilization(pid),
-            LinuxParser::Command(pid),
-            LinuxParser::Ram(pid),
-            LinuxParser::User(pid),
-            LinuxParser::UpTime(pid)
-            ));
-    }
-    std::sort(m_processes.begin(), m_processes.end(), Process::operator<())
-    return &m_processes;
 }
 
 std::string System::Kernel()
@@ -57,6 +40,26 @@ float System::MemoryUtilization()
 std::string System::OperatingSystem()
 {
     return m_operatingSystem;
+}
+
+std::vector<Process>& System::Processes()
+{ 
+    m_processes.clear();
+
+    for (const int pid : LinuxParser::Pids())
+    {
+        m_processes.emplace_back(Process(
+            LinuxParser::UpTime(pid),
+            LinuxParser::Command(pid),
+            LinuxParser::CpuUtilization(pid),
+            LinuxParser::Ram(pid),
+            pid,
+            LinuxParser::User(pid)
+            ));
+    }
+    
+    std::sort(m_processes.begin(), m_processes.end());
+    return m_processes;
 }
 
 int System::RunningProcesses()

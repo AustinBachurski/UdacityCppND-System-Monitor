@@ -8,24 +8,22 @@
 
 class System
 {
+ private:
+    Processor m_cpu;
+    std::string m_kernel;
+    std::string m_operatingSystem;
+    std::vector<Process> m_processes;
+
   public:
     System();
     Processor& Cpu();
-    std::vector<Process>& Processes();
-    float MemoryUtilization();
-    bool Multicore();
-    long UpTime();                      // TODO: See src/system.cpp
-    int TotalProcesses();
-    int RunningProcesses();
     std::string Kernel();
+    float MemoryUtilization();
     std::string OperatingSystem();
-
-  private:
-    Processor m_cpu;
-    std::vector<Process> m_processes;
-    std::string m_kernel;
-    std::string m_operatingSystem;
-
+    std::vector<Process>& Processes();
+    int RunningProcesses();
+    int TotalProcesses();
+    long UpTime();
 };
 
 #endif

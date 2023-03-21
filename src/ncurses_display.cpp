@@ -34,32 +34,33 @@ void NCursesDisplay::DisplaySystem(System& system, WINDOW* window)
     int row{0};
     mvwprintw(window, ++row, 2, ("OS: " + system.OperatingSystem()).c_str());
     mvwprintw(window, ++row, 2, ("Kernel: " + system.Kernel()).c_str());
-    mvwprintw(window, ++row, 2, "CPU: ");
+    mvwprintw(window, ++row, 2, "CPU:");
     wattron(window, COLOR_PAIR(1));
-    mvwprintw(window, row, 10, "");
+    mvwprintw(window, row, 10, " ");
     wprintw(window, ProgressBar(system.Cpu().Utilization()).c_str());
     wattroff(window, COLOR_PAIR(1));
-    // Multicore?
+    // Start Multicore
     if (system.Cpu().Multicore())
     {
         int coreNumber = 0;
-        for (const float& coreUtilization : *system.Cpu().Cores())
+        for (const float& coreUtilization : system.Cpu().Cores())
         {
-            std::string core {"Core" + std::to_string(coreNumber) + ": "};
-            mvwprintw(window, ++row, 2, core.c_str());
-            wattron(window, COLOR_PAIR(1)); // Change colors if it works.
-            mvwprintw(window, row, 10, "");
+            std::string coreName {" Core" + std::to_string(coreNumber) + ":"};
+
+            mvwprintw(window, ++row, 2, coreName.c_str());
+            wattron(window, COLOR_PAIR(3));
+            mvwprintw(window, row, 10, " ");
             wprintw(window, ProgressBar(coreUtilization).c_str());
-            wattroff(window, COLOR_PAIR(1)); // Change colors if it works.
+            wattroff(window, COLOR_PAIR(3));
             ++coreNumber;
         }
     }
-    // Multicore?
-    mvwprintw(window, ++row, 2, "Memory: ");
-    wattron(window, COLOR_PAIR(1));
-    mvwprintw(window, row, 10, "");
+    // End Multicore
+    mvwprintw(window, ++row, 2, "Memory:");
+    wattron(window, COLOR_PAIR(2));
+    mvwprintw(window, row, 10, " ");
     wprintw(window, ProgressBar(system.MemoryUtilization()).c_str());
-    wattroff(window, COLOR_PAIR(1));
+    wattroff(window, COLOR_PAIR(2));
     mvwprintw(window, ++row, 2, ("Total Processes: " + std::to_string(system.TotalProcesses())).c_str());
     mvwprintw(window, ++row, 2, ("Running Processes: " + std::to_string(system.RunningProcesses())).c_str());
     mvwprintw(window, ++row, 2, ("Up Time: " + Format::ElapsedTime(system.UpTime())).c_str());
@@ -70,11 +71,11 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes, WINDOW* w
 {
     int row{0};
     int const pid_column{2};
-    int const user_column{9};
-    int const cpu_column{16};
-    int const ram_column{26};
-    int const time_column{35};
-    int const command_column{46};
+    int const user_column{12};
+    int const cpu_column{22};
+    int const ram_column{30};
+    int const time_column{39};
+    int const command_column{50};
     wattron(window, COLOR_PAIR(2));
     mvwprintw(window, ++row, pid_column, "PID");
     mvwprintw(window, row, user_column, "USER");
@@ -92,7 +93,7 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes, WINDOW* w
         mvwprintw(window, row, pid_column, std::to_string(processes[i].Pid()).c_str());
         mvwprintw(window, row, user_column, processes[i].User().c_str());
         float cpu = processes[i].CpuUtilization() * 100;
-        mvwprintw(window, row, cpu_column, std::to_string(cpu).substr(0, 4).c_str());
+        mvwprintw(window, row, cpu_column, std::to_string(cpu).substr(0, 3).c_str());
         mvwprintw(window, row, ram_column, processes[i].Ram().c_str());
         mvwprintw(window, row, time_column, Format::ElapsedTime(processes[i].UpTime()).c_str());
         mvwprintw(window, row, command_column, processes[i].Command().substr(0, window->_maxx - 46).c_str());
@@ -107,13 +108,14 @@ void NCursesDisplay::Display(System& system, int n)
     start_color();  // enable color
 
     int x_max{getmaxx(stdscr)};
-    WINDOW* system_window = newwin(9, x_max - 1, 0, 0);
+    WINDOW* system_window = newwin(9 + system.Cpu().GetCoreCount(), x_max - 1, 0, 0);
     WINDOW* process_window = newwin(3 + n, x_max - 1, system_window->_maxy + 1, 0);
 
     while (1)
     {
         init_pair(1, COLOR_BLUE, COLOR_BLACK);
         init_pair(2, COLOR_GREEN, COLOR_BLACK);
+        init_pair(3, COLOR_CYAN, COLOR_BLACK);
         box(system_window, 0, 0);
         box(process_window, 0, 0);
         DisplaySystem(system, system_window);

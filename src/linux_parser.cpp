@@ -1,5 +1,6 @@
 #include <dirent.h>
 #include <filesystem>
+#include <limits>
 #include <unistd.h>
 #include <sstream>
 #include <string>
@@ -10,7 +11,7 @@ std::string LinuxParser::Command(int pid)
 {
     std::string command {};
 
-    std::ifstream filestream("/proc/" + std::to_string(pid) + "/cmdline");
+    std::ifstream filestream(m_proc + std::to_string(pid) + m_command);
     if (filestream.is_open())
     {
         filestream >> command;
@@ -20,98 +21,31 @@ std::string LinuxParser::Command(int pid)
 }
 
 float LinuxParser::CpuUtilization(int pid)
-{ // Can't say I'm a fan of how messy this function is, but if it works...
-    const int userTimePosition { 14 };
-    const int childKernelTimePosition { 17 };
-    const int startTimePosition { 22 };
+{
+    float userTime {};
+    float kernelTime {};
+    float childUserTime {};
+    float childKernelTime {};
+    float timeActive {};
+    float timeRunning { UpTime(pid) };
 
-    float upTimeThen = Uptime(); // Already in seconds!
-    float userTimeThen {};
-    float kernelTimeThen {};
-    float childUserTimeThen {};
-    float childKernelTimeThen {};
-    float timeRunningThen {};
-    float timeActiveThen {};
-    float startTime {};
-
-    float upTimeNow = Uptime(); // Already in seconds!
-    float userTimeNow {};
-    float kernelTimeNow {};
-    float childUserTimeNow {};
-    float childKernelTimeNow {};
-    float timeRunningNow {};
-    float timeActiveNow {};
-
-    std::ifstream filestreamThen("/proc/" + std::to_string(pid) + "/stat");
+    std::ifstream filestreamThen(m_proc + std::to_string(pid) + m_stat);
     if (filestreamThen.is_open())
     {
-        for (int streamPosition = 0; streamPosition < userTimePosition; ++streamPosition)
+        for (int streamPosition = m_startOfStream; streamPosition < m_userTimePosition - 1; ++streamPosition)
         {
-            filestreamThen >> userTimeThen;
+            filestreamThen.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
         }
-        filestreamThen >> kernelTimeThen >> childUserTimeThen >> childKernelTimeThen;
-        for (int streamPosition = childKernelTimePosition; streamPosition < startTimePosition; ++streamPosition)
-        {
-            filestreamThen >> startTime;
-        }
-        filestreamThen.close();
-        startTime /= sysconf(_SC_CLK_TCK);
-        float timeRunningThen = upTimeThen - startTime;
-        float timeActiveThen = (
-            userTimeThen + kernelTimeThen + childUserTimeThen + childKernelTimeThen) / sysconf(_SC_CLK_TCK);
-    }
-    usleep(500000);
-    std::ifstream filestreamNow("/proc/" + std::to_string(pid) + "/stat");
-    if (filestreamNow.is_open())
-    {
-        for (int streamPosition = 0; streamPosition < userTimePosition; ++streamPosition)
-        {
-            filestreamNow >> userTimeNow;
-        }
-        filestreamNow >> kernelTimeNow >> childUserTimeNow >> childKernelTimeNow;
-        float timeRunningNow = upTimeNow - startTime;
-        float timeActiveNow = (
-            userTimeNow + kernelTimeNow + childUserTimeNow + childKernelTimeNow) / sysconf(_SC_CLK_TCK);
+
+        filestreamThen >> userTime >> kernelTime >> childUserTime >> childKernelTime;
+        timeActive = (userTime + kernelTime + childUserTime + childKernelTime) / sysconf(_SC_CLK_TCK);
         
-        return (timeActiveNow - timeActiveThen) / (timeRunningNow - timeRunningThen);
+        if (timeRunning)
+        {
+            return timeActive / timeRunning;
+        }
     }
     return 0.0f;
-}
-
-int LinuxParser::GetProcesses(const std::string state)
-{
-    std::string check {};
-    std::string value {};
-
-    std::ifstream filestream("/proc/stat");
-    if (filestream.is_open())
-    {
-        while (!filestream.eof())
-        {
-            filestream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            filestream >> check;
-            if (check == state)
-            {
-                filestream >> value;
-                if (IsNumber(value))
-                {
-                    return std::stoi(value);
-                }  
-            }
-        }  
-    }
-    return 0;
-}
-
-bool LinuxParser::IsNumber(const std::string& value)
-{
-    /*
-    Not sure if this is good practice or not - it felt like a
-    don't repeat yourself situation with all the arguments, 
-    but I'm just calling one function from another 
-    function - should I not be doing this? - Thank you.
-    */
-    return std::all_of(value.begin(), value.end(), isdigit);
 }
 
 std::string LinuxParser::Kernel()
@@ -121,7 +55,7 @@ std::string LinuxParser::Kernel()
     std::string os {};
     std::string line {};
 
-    std::ifstream stream("/proc/version");
+    std::ifstream stream(m_version);
     if (stream.is_open())
     {
         std::getline(stream, line);
@@ -131,50 +65,66 @@ std::string LinuxParser::Kernel()
     return kernel;
 }
 
-float LinuxParser::MemoryUtilization()
+std::string LinuxParser::GetValueFromKeyAsString(std::ifstream& stream, const std::string searchString)
 {
-    float free {};
-    std::string line {};
-    std::string key {};
-    std::string suffix {};
-    float total {};
-    std::string value {};
+     std::string checkString {};
+     std::string value {};
 
-    std::ifstream stream("/proc/meminfo");
     if (stream.is_open())
     {
-        while(std::getline(stream, line))
+        if (stream.tellg())
         {
-            std::istringstream linestream(line);
-            linestream >> key >> value >> suffix;
-
-            if (key == "MemTotal:")
+            stream.clear();
+            stream.seekg(0);
+        }
+            
+        while (!stream.eof())
+        {
+            stream >> checkString;
+            if (checkString == searchString)
             {
-                if (IsNumber(value))
-                {
-                    total = std::stof(value);
-                }
+                stream >> value;
+                return value;
             }
-            else if (key == "MemFree:")
+            else
             {
-                if (IsNumber(value))
-                {
-                    free = std::stof(value);
-                    break;
-                }
+                stream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             }
         }
     }
-    return (total - free) / total;
+    return "0";
 }
 
-std::string LinuxParser::OperatingSystem()
+bool LinuxParser::IsStringNumber(std::string& string)
+{
+    return std::all_of(string.begin(), string.end(), isdigit);
+}
+
+float LinuxParser::MemoryUtilization()
+{
+    std::ifstream filestream(m_meminfo);
+    std::string freeString = GetValueFromKeyAsString(filestream, "MemFree:");
+    std::string totalString = GetValueFromKeyAsString(filestream, "MemTotal:");
+
+    if (IsStringNumber(freeString) && IsStringNumber(totalString))
+    {
+        float free = std::stof(freeString);
+        float total = std::stof(totalString);
+        if (total)
+        {
+            return (total - free) / total;
+        }
+    }
+    return 0.0f;
+}
+
+std::string LinuxParser::OperatingSystem()  // REFACTOR THIS
 {
     std::string line {};
     std::string key {};
     std::string value {};
 
-    std::ifstream filestream("/etc/os-release");
+    std::ifstream filestream(m_os);
     if (filestream.is_open())
     {
         while (std::getline(filestream, line))
@@ -201,105 +151,112 @@ std::vector<int> LinuxParser::Pids()
 {
     std::vector<int> m_pids {};
 
-    for (const auto& file : std::filesystem::directory_iterator("/proc"))
+    for (const auto& file : std::filesystem::directory_iterator(m_proc))
     {
         if (file.is_directory())
         {
-            std::string filename(file.path().filename());
-            if (IsNumber(filename))
+            std::string pidString(file.path().filename());
+            if (IsStringNumber(pidString))
             {
-                m_pids.push_back(std::stoi(filename));
+                m_pids.emplace_back(std::stoi(pidString));
             }
         }
     }
     return m_pids;
 }
 
-std::string LinuxParser::Ram(int pid)
+std::string LinuxParser::Ram(int pid) // Instructions state to use VmSize - see comment below.
 {
-    std::string check {};
-    std::string usage {};
-
-    std::ifstream filestream("/proc/" + std::to_string(pid) + "/status");
-    if (filestream.is_open())
+    std::ifstream filestream(m_proc + std::to_string(pid) + m_status);
+    std::string valueString = GetValueFromKeyAsString(filestream, "VmRSS:");
+    if (IsStringNumber(valueString))
     {
-        filestream.ignore(std::numeric_limits<std::streamsize>max(), '\n');
-        filestream >> check;
-        if (check == "VMSize:")
-        {
-            filestream >> usage;
-            return usage;
-        }
-    }
-    return "";
+        float value = std::stof(valueString);
+        value /= 1000;
+        return SetFloatPrecisionAsString(value, 2);
+    }  
+    return "0.0";
 }
+/*
+Followed instructions initially but I was displaying more ram usage than my
+system is equipped with.  After looking into why, I felt that VmRSS was more appropriate.
+
+Source:
+https://www.hackerearth.com/practice/notes/vivekprakash/technical-diving-into-memory-used-by-a-program-in-online-judges/
+
+"VmSize is how much virtual memory the process has in total. 
+    This includes all types of memory, both in RAM and swapped out. 
+    These numbers can get skewed because they also include shared libraries."
+
+"VmRSS in /proc/[pid]/statm is a useful data. 
+    It shows how much memory in RAM is occupied by the process. 
+    The rest extra memory has either been not used or has been swapped out."
+*/
 
 int LinuxParser::RunningProcesses()
 {
-    return GetProcesses(m_runningProcesses);
-}
-
-int LinuxParser::TotalProcesses()
-{
-    return GetProcesses(m_totalProcesses);
-}
-
-std::string LinuxParser::Uid(int pid)
-{
-    std::string check {};
-    std::string uid {};
-
-    std::ifstream filestream("/proc/" + std::to_string(pid) + "/status");
-    if (filestream.open())
+    std::ifstream filestream(m_procStat);
+    std::string countString = GetValueFromKeyAsString(filestream, "procs_running");
+    if (IsStringNumber(countString))
     {
-        while (!filestream.eof())
-        {
-            filestream.ignore(std::numeric_limits<std::streamsize>max(), '\n');
-            filestream >> check;
-            if (check == "Uid:")
-            {
-                filestream >> uid;
-                return uid;
-            }
-        }
-    }
-    return "";
-}
-
-long LinuxParser::UpTime()
-{
-    std::string line {};
-
-    std::ifstream filestream ("/proc/uptime");
-    if (filestream.is_open())
-    {
-        filestream >> line;
-        if (IsNumber(line))
-        {
-            return std::stol(line);
-        }
+        return std::stoi(countString);
     }
     return 0;
 }
 
-long LinuxParser::UpTime(int pid)
+std::string LinuxParser::SetFloatPrecisionAsString(float value, int decimalPlaces)
 {
-    const int desiredPosition { 22 };
-    std::string upTime {};
+    std::string valueAsString = std::to_string(value);
+    valueAsString.erase(valueAsString.find('.') + decimalPlaces);
+    return valueAsString;
+}
 
-    std::ifstream filestream("/proc/" + std::to_string(pid) + "/stat");
+int LinuxParser::TotalProcesses()
+{
+    std::ifstream filestream(m_procStat);
+    std::string countString = GetValueFromKeyAsString(filestream, "processes");
+    if (IsStringNumber(countString))
+    {
+        return std::stoi(countString);
+    }
+    return 0;
+}
+
+std::string LinuxParser::Uid(int pid)
+{
+    std::ifstream filestream(m_proc + std::to_string(pid) + m_status);
+    return GetValueFromKeyAsString(filestream, "Uid:");
+}
+
+long LinuxParser::UpTime()
+{
+    long time {};
+
+    std::ifstream filestream (m_uptime);
     if (filestream.is_open())
     {
-        for (int streamPosition = 0; streamPosition < desiredPosition; ++streamPosition)
-        {
-            filestream >> upTime;
-        }
-        if (IsNumber(upTime))
-        {
-            return std::stol(upTime) / sysconf(_SC_CLK_TCK);
-        }
+        filestream >> time;
+        return time;
     }
-  return 0;
+    return 0;
+}
+
+float LinuxParser::UpTime(int pid)
+{
+    float startTime {};
+
+    std::ifstream filestream(m_proc + std::to_string(pid) + m_stat);
+    if (filestream.is_open())
+    {
+        for (int streamPosition = m_startOfStream; streamPosition < m_startTimePosition - 1; ++streamPosition)
+        {
+            filestream.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
+        }
+        filestream >> startTime;
+        return UpTime() - startTime / sysconf(_SC_CLK_TCK);
+
+    }
+    return 0;
 }
 
 std::string LinuxParser::User(int pid)
@@ -310,13 +267,14 @@ std::string LinuxParser::User(int pid)
     std::string password {};
     std::string check {};
 
-    std::ifstream filestream("/etc/passwd");
-    if (filestream.open())
+    std::ifstream filestream(m_password);
+    if (filestream.is_open())
     {
         while (std::getline(filestream, line))
         {
             std::replace(line.begin(), line.end(), ':', ' ');
-            line >> user >> password >> check;
+            std::istringstream linestream(line);
+            linestream >> user >> password >> check;
             if (check == uid)
             {
                 return user;

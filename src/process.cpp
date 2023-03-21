@@ -1,22 +1,21 @@
 #include <unistd.h>
 #include <string>
-
 #include "process.h"
 
 Process::Process(
-    int pid, 
-    float utilization, 
-    std::string command, 
+    long int age,
+    std::string command,
+    float cpuUtilization,
     std::string memory, 
-    std::string user, 
-    long int age
-):
+    int pid, 
+    std::string user
+    ):
+m_age{ age },
+m_command{ command },
+m_cpuUtilization{ cpuUtilization },
+m_memory{ memory },
 m_pid{ pid },
-m_cpuUtilization{ utilization },
-m_generatedCommand{ command },
-m_memoryUtilization{ memory },
-m_user{ user },
-m_age{ age }
+m_user{ user }
 {}
 
 int Process::Pid()
@@ -31,12 +30,12 @@ float Process::CpuUtilization()
 
 std::string Process::Command()
 {
-    return m_generatedCommand;
+    return m_command;
 }
 
 std::string Process::Ram()
 {
-    return m_memoryUtilization;
+    return m_memory;
 }
 
 std::string Process::User()
@@ -51,5 +50,11 @@ long int Process::UpTime()
 
 bool Process::operator<(const Process& comparison) const
 {
-    return m_cpuUtilization < comparison.m_cpuUtilization;
+    // Sort by highest CPU usage
+    // return m_cpuUtilization > comparison.m_cpuUtilization;
+    
+    // Sort by highest Memory usage
+    float a = std::stof(m_memory);
+    float b = std::stof(comparison.m_memory);
+    return a > b;
 }

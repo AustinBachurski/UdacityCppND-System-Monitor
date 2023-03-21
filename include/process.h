@@ -8,32 +8,30 @@ It contains relevant attributes as shown below
 */
 class Process
 {
-  public:
+ private:
+    long int m_age;
+    std::string m_command;
+    float m_cpuUtilization;
+    std::string m_memory;
+    long m_pid;
+    std::string m_user;
+
+ public:
     Process(
-        int pid, 
-        float utilization, 
-        std::string command, 
+        long int age,
+        std::string command,
+        float cpuUtilization,
         std::string memory, 
-        std::string user, 
-        long int age
+        int pid, 
+        std::string user
     );
-    
     int Pid();
     std::string User();
     std::string Command();
     float CpuUtilization();
     std::string Ram();
     long int UpTime();
-    bool operator<(Process const& a) const;
-
- private:
-    int m_pid;
-    float m_cpuUtilization;
-    std::string m_generatedCommand;
-    std::string m_memoryUtilization;
-    std::string m_user;
-    long int m_age;
-
+    bool operator<(Process const& a) const; 
 };
 
 #endif

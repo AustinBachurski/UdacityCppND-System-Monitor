@@ -9,28 +9,30 @@
 
 class Processor
 {
-  public:
+ private:
+    void UpdateCoreUtilization();
+    int m_coreCount;
+    std::vector<float> m_cores;
+    float m_cpuIdleNow;
+    float m_cpuIdleThen;
+    float m_cpuNiceNow;
+    float m_cpuNiceThen;
+    float m_cpuSystemNow;
+    float m_cpuSystemThen;
+    float m_cpuUserNow;
+    float m_cpuUserThen;
+    long m_sleepTime;
+    const std::string m_statPath;
+    float m_sumNow;
+    float m_sumThen;
+
+ public:
     Processor();
-    std::vector<float>* Cores();
+    std::vector<float>& Cores();
+    int GetCoreCount();
     bool Multicore();
     int SetCoreCount();
     float Utilization();
-
-  private:
-    void UpdateCoreUtilization();
-    const int m_coreCount;
-    std::vector<float> m_cores;
-    float m_cpuUserThen;
-    float m_cpuNiceThen;
-    float m_cpuSystemThen;
-    float m_cpuIdleThen;
-    float m_cpuUserNow;
-    float m_cpuNiceNow;
-    float m_cpuSystemNow;
-    float m_cpuIdleNow;
-    const std::string m_statPath {"/proc/stat"};
-    float m_sumThen;
-    float m_sumNow;
 };
 
 #endif

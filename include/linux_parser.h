@@ -9,53 +9,35 @@
 
 namespace LinuxParser
 {
-    // Delete this before submitting!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    const std::string kProcDirectory{"/proc/"};
-    const std::string kCmdlineFilename{"/cmdline"};
-    const std::string kCpuinfoFilename{"/cpuinfo"};
-    const std::string kStatusFilename{"/status"};
-    const std::string kStatFilename{"/stat"};
-    const std::string kUptimeFilename{"/uptime"};
-    const std::string kMeminfoFilename{"/meminfo"};
-    const std::string kVersionFilename{"/version"};
-    const std::string kOSPath{"/etc/os-release"};
-    const std::string kPasswordPath{"/etc/passwd"};
-
-
-
-    const std::string m_runningProcesses {"procs_running"};
-    const std::string m_totalProcesses {"processes"};
-
-    enum CPUStates // Pointless, remove!
-    {
-        kUser_ = 0,
-        kNice_,
-        kSystem_,
-        kIdle_,
-        kIOwait_,
-        kIRQ_,
-        kSoftIRQ_,
-        kSteal_,
-        kGuest_,
-        kGuestNice_
-    };
+    const std::string m_command { "/cmdline" };
+    const std::string m_meminfo { "/proc/meminfo" };
+    const std::string m_os { "/etc/os-release" };
+    const std::string m_password { "/etc/passwd" };
+    const std::string m_proc { "/proc/" };
+    const std::string m_procStat { "/proc/stat" };
+    const int m_startOfStream { 0 };
+    const int m_startTimePosition { 22 }; // From man pages.
+    const std::string m_stat { "/stat" };
+    const std::string m_status { "/status" };
+    const std::string m_uptime { "/proc/uptime" };
+    const int m_userTimePosition { 14 }; // From man pages.
+    const std::string m_version { "/proc/version" };
 
     std::string Command(int pid);
     float CpuUtilization(int pid);
-    int GetProcesses(const std::string state);
-    long IdleJiffies();
-    bool IsNumber(const std::string& value);
-    long Jiffies();
+    std::string GetValueFromKeyAsString(std::ifstream& stream, const std::string searchString);
+    bool IsStringNumber(std::string& string);
     std::string Kernel();
     float MemoryUtilization();
     std::string OperatingSystem();
     std::vector<int> Pids();
     std::string Ram(int pid);
     int RunningProcesses();
+    std::string SetFloatPrecisionAsString(float value, int decimalPlaces);
     int TotalProcesses();
     std::string Uid(int pid);
     long UpTime();
-    long int UpTime(int pid);
+    float UpTime(int pid);
     std::string User(int pid);
 };
 
