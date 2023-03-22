@@ -129,7 +129,7 @@ std::string LinuxParser::OperatingSystem()
         {
             if (os.find("PRETTY") != std::string::npos)
             {
-                os.erase(0, os.find("\"") + 1);
+                os.erase(0, os.find("\"") + 1); // + 1 to include the found character.
                 os.erase(os.rfind("\""), std::string::npos);
                 return os;
             }
