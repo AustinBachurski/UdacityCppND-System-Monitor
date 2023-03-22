@@ -7,7 +7,7 @@
 #include <vector>
 #include "linux_parser.h"
 
-std::string LinuxParser::Command(int pid)
+std::string LinuxParser::Command(const int pid)
 {
     std::string command {};
 
@@ -20,7 +20,7 @@ std::string LinuxParser::Command(int pid)
   return "";
 }
 
-float LinuxParser::CpuUtilization(int pid)
+std::string LinuxParser::CpuUtilization(const int pid)
 {
     float userTime {};
     float kernelTime {};
@@ -42,10 +42,10 @@ float LinuxParser::CpuUtilization(int pid)
         
         if (timeRunning)
         {
-            return timeActive / timeRunning;
+            return SetFloatPrecisionAsString((timeActive / timeRunning) * 100, 2, m_modeCpu);
         }
     }
-    return 0.0f;
+    return "0.0";
 }
 
 std::string LinuxParser::Kernel()
@@ -95,7 +95,7 @@ std::string LinuxParser::GetValueFromKeyAsString(std::ifstream& stream, const st
     return "0";
 }
 
-bool LinuxParser::IsStringNumber(std::string& string)
+bool LinuxParser::IsStringNumber(const std::string& string)
 {
     return std::all_of(string.begin(), string.end(), isdigit);
 }
@@ -125,13 +125,12 @@ std::string LinuxParser::OperatingSystem()
     std::ifstream filestream(m_os);
     if (filestream.is_open())
     {
-        while (!filestream.eof())
+        while (std::getline(filestream, os))
         {
-            filestream >> os;
             if (os.find("PRETTY") != std::string::npos)
             {
-                os.erase(0, os.find("\""));
-                os.erase(test.rfind("\""));
+                os.erase(0, os.find("\"") + 1);
+                os.erase(os.rfind("\""), std::string::npos);
                 return os;
             }
         }
@@ -157,7 +156,7 @@ std::vector<int> LinuxParser::Pids()
     return m_pids;
 }
 
-std::string LinuxParser::Ram(int pid) // Instructions state to use VmSize - see comment below.
+std::string LinuxParser::Ram(const int pid) // Instructions state to use VmSize - see comment below.
 {
     std::ifstream filestream(m_proc + std::to_string(pid) + m_status);
     std::string valueString = GetValueFromKeyAsString(filestream, "VmRSS:");
@@ -165,7 +164,7 @@ std::string LinuxParser::Ram(int pid) // Instructions state to use VmSize - see 
     {
         float value = std::stof(valueString);
         value /= 1000;
-        return SetFloatPrecisionAsString(value, 2);
+        return SetFloatPrecisionAsString(value, 2, m_modeRam);
     }  
     return "0.0";
 }
@@ -196,15 +195,32 @@ int LinuxParser::RunningProcesses()
     return 0;
 }
 
-std::string LinuxParser::SetFloatPrecisionAsString(float value, int decimalPlaces)
-{
-    std::string valueAsString = std::to_string(value);
-    if (valueAsString.find('.') == 3)
+std::string LinuxParser::SetFloatPrecisionAsString(const float value, const int decimalPlaces, const std::string& mode)
+{ 
+    std::string valueAsString  {};
+    if (mode == m_modeCpu)
+    {
+        valueAsString = std::to_string(value);
+    }
+    valueAsString = std::to_string(value);
+    valueAsString.erase(valueAsString.find('.') + decimalPlaces);
+
+    if (valueAsString.find('.') == 3 && mode == m_modeCpu)
     {
         return "100";
     }
-    valueAsString.erase(valueAsString.find('.') + decimalPlaces);
-    return valueAsString;
+    else if (valueAsString.find('.') == std::string::npos)
+    {
+        return valueAsString + ".0";
+    }
+    else if (valueAsString.find('.') == valueAsString.length() - 1)
+    {
+        return valueAsString + "0";
+    }
+    else
+    {
+        return valueAsString;
+    }
 }
 
 int LinuxParser::TotalProcesses()
@@ -218,7 +234,7 @@ int LinuxParser::TotalProcesses()
     return 0;
 }
 
-std::string LinuxParser::Uid(int pid)
+std::string LinuxParser::Uid(const int pid)
 {
     std::ifstream filestream(m_proc + std::to_string(pid) + m_status);
     return GetValueFromKeyAsString(filestream, "Uid:");
@@ -237,7 +253,7 @@ long LinuxParser::UpTime()
     return 0;
 }
 
-float LinuxParser::UpTime(int pid)
+float LinuxParser::UpTime(const int pid)
 {
     float startTime {};
 
@@ -255,7 +271,7 @@ float LinuxParser::UpTime(int pid)
     return 0;
 }
 
-std::string LinuxParser::User(int pid)
+std::string LinuxParser::User(const int pid)
 {
     std::string uid = Uid(pid);
     std::string user {};

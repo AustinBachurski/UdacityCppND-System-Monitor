@@ -5,7 +5,7 @@
 Process::Process(
     long int age,
     std::string command,
-    float cpuUtilization,
+    std::string cpuUtilization,
     std::string memory, 
     int pid, 
     std::string user
@@ -23,7 +23,7 @@ int Process::Pid()
     return m_pid;
 }
 
-float Process::CpuUtilization()
+std::string Process::CpuUtilization()
 {
     return m_cpuUtilization;
 }
@@ -51,7 +51,7 @@ long int Process::UpTime()
 bool Process::operator<(const Process& comparison) const
 {
     // Sort by highest CPU usage
-    // return m_cpuUtilization > comparison.m_cpuUtilization;
+    // return std::stof(m_cpuUtilization) > std::stof(comparison.m_cpuUtilization);
     
     // Sort by highest Memory usage
     float a = std::stof(m_memory);

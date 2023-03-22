@@ -132,7 +132,7 @@ float Processor::Utilization()
     std::ifstream filestreamNow(m_statPath);
     if (filestreamNow.is_open())
     {
-        filestreamThen.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
+        filestreamNow.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
         filestreamNow  >> m_cpuUserNow >> m_cpuNiceNow >> m_cpuSystemNow >> m_cpuIdleNow;
     }
 

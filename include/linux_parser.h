@@ -11,6 +11,8 @@ namespace LinuxParser
 {
     const std::string m_command { "/cmdline" };
     const std::string m_meminfo { "/proc/meminfo" };
+    const std::string m_modeCpu { "cpu" };
+    const std::string m_modeRam { "ram" };
     const std::string m_os { "/etc/os-release" };
     const std::string m_password { "/etc/passwd" };
     const std::string m_proc { "/proc/" };
@@ -23,22 +25,22 @@ namespace LinuxParser
     const int m_userTimePosition { 14 }; // From man pages.
     const std::string m_version { "/proc/version" };
 
-    std::string Command(int pid);
-    float CpuUtilization(int pid);
+    std::string Command(const int pid);
+    std::string CpuUtilization(const int pid);
     std::string GetValueFromKeyAsString(std::ifstream& stream, const std::string searchString);
-    bool IsStringNumber(std::string& string);
+    bool IsStringNumber(const std::string& string);
     std::string Kernel();
     float MemoryUtilization();
     std::string OperatingSystem();
     std::vector<int> Pids();
-    std::string Ram(int pid);
+    std::string Ram(const int pid);
     int RunningProcesses();
-    std::string SetFloatPrecisionAsString(float value, int decimalPlaces);
+    std::string SetFloatPrecisionAsString(const float value, const int decimalPlaces, const std::string& mode);
     int TotalProcesses();
-    std::string Uid(int pid);
+    std::string Uid(const int pid);
     long UpTime();
-    float UpTime(int pid);
-    std::string User(int pid);
+    float UpTime(const int pid);
+    std::string User(const int pid);
 };
 
 #endif
